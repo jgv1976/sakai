@@ -145,12 +145,13 @@ public class ItemBean
   private String origSection;  // section id for the item to be added to
   private String selectedSection="0";  // section id for the item to be assigned to
 
+  private String markersPair="{}";
 
   private boolean caseSensitiveForFib=false;
   private boolean mutuallyExclusiveForFib=false;
   private boolean caseSensitiveForFin=false;
   private boolean mutuallyExclusiveForFin=false;
-  //not used now. This is used to deteremine whether 
+  //not used now. This is used to deteremine whether
   //we show the checkbox for mutually exclusive, 
   //depending on the answers entered in the wysiwyg editor.   
   private boolean showMutuallyExclusiveForFibCheckbox=false;  
@@ -1400,14 +1401,34 @@ public class ItemBean
 
   /**
    * for fib questions
-   * @param case sensitive for grading?
+   * @param param the pair of markers
    */
-  public void setCaseSensitiveForFib(boolean param)
+  public void setMarkersPair(String param)
   {
-    this.caseSensitiveForFib = param;
+      if ((param ==null) || (param.length()<2)) param="{}";
+      this.markersPair = param;
   }
 
   /**
+  * for fib questions, the pair of markers
+  * @return
+  */
+  public String getMarkersPair()
+  {
+      return markersPair;
+  }
+
+    /**
+     * for fib questions
+     * @param case sensitive for grading?
+     */
+    public void setCaseSensitiveForFib(boolean param)
+    {
+        this.caseSensitiveForFib = param;
+    }
+
+
+    /**
    * for fib, Mutually exclusive for multiple answers,  for grading?
    * @return
    */

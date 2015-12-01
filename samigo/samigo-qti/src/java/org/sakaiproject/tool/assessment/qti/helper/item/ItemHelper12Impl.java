@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
@@ -771,7 +773,11 @@ public class ItemHelper12Impl extends ItemHelperBase
   {
     if ( (fibAns != null) && (fibAns.trim().length() > 0))
     {
-      List fibList = parseFillInBlank(fibAns);
+      String markers_pair= StringEscapeUtils.unescapeHtml(itemXml.getFieldentry("MARKERS_PAIR"));
+      if ((StringUtils.isEmpty(markers_pair))||markers_pair.length()!=2){
+        markers_pair="{}";
+      }
+      List fibList = parseFillInBlank(fibAns,markers_pair);
       Map valueMap = null;
       //Set newSet = null;
       String mattext = null;
@@ -858,14 +864,15 @@ public class ItemHelper12Impl extends ItemHelperBase
    * @param fib
    * @return
    */
-  private static String padFibWithNonbreakSpacesText(String fib)
+  private static String padFibWithNonbreakSpacesText(String fib, String marker_left,String marker_right)
   {
 
-    if (fib.startsWith("{"))
+    if (fib.startsWith(marker_left))
     {
       fib = NBSP + fib;
     }
-    return fib.replaceAll("\\}\\{", "}" + NBSP + "{");
+    String regExp="\\"+marker_right+"\\"+marker_left;
+    return fib.replaceAll(regExp, marker_right + NBSP + marker_left);
   }
 
   /**
@@ -1589,9 +1596,11 @@ public class ItemHelper12Impl extends ItemHelperBase
    * @param input
    * @return list of Maps
    */
-  private static List parseFillInBlank(String input)
+  private static List parseFillInBlank(String input, String markers_pair)
   {
-    input = padFibWithNonbreakSpacesText(input);
+    String marker_left=""+markers_pair.charAt(0);
+    String marker_right=""+markers_pair.charAt(1);
+    input = padFibWithNonbreakSpacesText(input,marker_left,marker_right);
 
     Map tempMap = null;
     List storeParts = new ArrayList();
@@ -1600,7 +1609,7 @@ public class ItemHelper12Impl extends ItemHelperBase
       return storeParts;
     }
 
-    StringTokenizer st = new StringTokenizer(input, "}");
+    StringTokenizer st = new StringTokenizer(input, marker_right);
     String tempToken = "";
     String[] splitArray = null;
 
@@ -1610,7 +1619,8 @@ public class ItemHelper12Impl extends ItemHelperBase
       tempMap = new HashMap();
 
       //split out text and answer parts from token
-      splitArray = tempToken.trim().split("\\{", 2);
+      String splitRegEx="\\"+ marker_left;
+      splitArray = tempToken.trim().split(splitRegEx, 2);
       tempMap.put("text", splitArray[0].trim());
       if (splitArray.length > 1)
       {

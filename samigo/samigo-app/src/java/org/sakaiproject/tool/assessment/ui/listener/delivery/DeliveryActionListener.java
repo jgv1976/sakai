@@ -44,6 +44,8 @@ import javax.faces.event.ActionListener;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.math.util.MathUtils;
@@ -1949,10 +1951,16 @@ public class DeliveryActionListener
   public void populateFib(ItemDataIfc item, ItemContentsBean bean, HashMap<Long, AnswerIfc> publishedAnswerHash)
   {
     // Only one text in FIB
+    //Checking if customized Markers Pair
+    String markers_pair=StringEscapeUtils.unescapeHtml(item.getItemMetaDataByLabel("MARKERS_PAIR"));
+    if ((StringUtils.isEmpty(markers_pair))||markers_pair.length()!=2){
+        markers_pair="{}";
+    }
+
     ItemTextIfc text = (ItemTextIfc) item.getItemTextArraySorted().toArray()[0];
     ArrayList fibs = new ArrayList();
     String alltext = text.getText();
-    ArrayList texts = extractFIBFINTextArray(alltext);
+    ArrayList texts = extractFIBFINTextArray(alltext,markers_pair);
     int i = 0;
     Iterator iter = text.getAnswerArraySorted().iterator();
     while (iter.hasNext())
@@ -2017,19 +2025,19 @@ public class DeliveryActionListener
     bean.setFibArray(fibs);
   }
 
-  private static ArrayList extractFIBFINTextArray(String alltext)
+  private static ArrayList extractFIBFINTextArray(String alltext,String markers_pair)
   {
     ArrayList texts = new ArrayList();
 
-    while (alltext.indexOf("{}") > -1)
+    while (alltext.indexOf(markers_pair) > -1)
     {
-      int alltextLeftIndex = alltext.indexOf("{}");
+      int alltextLeftIndex = alltext.indexOf(markers_pair);
       //int alltextRightIndex = alltext.indexOf("}");
 
       String tmp = alltext.substring(0, alltextLeftIndex);
       alltext = alltext.substring(alltextLeftIndex + 2);
       texts.add(tmp);
-      // there are no more "{}", exit loop. 
+      // there are no more markers_pair, exit loop.
       // why do we this check? will it ever come to here?
       if (alltextLeftIndex == -1)
       {
@@ -2102,7 +2110,7 @@ public class DeliveryActionListener
     ItemTextIfc text = (ItemTextIfc) item.getItemTextArraySorted().toArray()[0];
     ArrayList fins = new ArrayList();
     String alltext = text.getText();
-    ArrayList texts = extractFIBFINTextArray(alltext);
+    ArrayList texts = extractFIBFINTextArray(alltext,"{}");
     int i = 0;
     Iterator iter = text.getAnswerArraySorted().iterator();
     while (iter.hasNext())

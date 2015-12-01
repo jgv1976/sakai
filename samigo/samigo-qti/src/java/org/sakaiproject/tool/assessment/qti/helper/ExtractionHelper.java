@@ -40,6 +40,8 @@ import java.util.TreeSet;
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -2199,7 +2201,13 @@ public class ExtractionHelper
       itemTextStringbuf.append(text);
       if (i < answerList.size())
       {
-        itemTextStringbuf.append(FIB_BLANK_INDICATOR);
+        String markers_pair= StringEscapeUtils.unescapeHtml(item.getItemMetaDataByLabel("MARKERS_PAIR"));
+        if ((StringUtils.isEmpty(markers_pair))||markers_pair.length()!=2){
+          markers_pair=FIB_BLANK_INDICATOR;
+        }else{
+          markers_pair=" "+markers_pair+" ";
+        }
+        itemTextStringbuf.append(markers_pair);
       }
     }
     String itemTextString = itemTextStringbuf.toString();

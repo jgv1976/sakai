@@ -104,7 +104,7 @@
 </f:subview>
 
 <%-- 2 QUESTION TEXT --%>
-  <div class="longtext"> <h:outputLabel value="#{authorMessages.q_text}" />
+<div class="longtext"> <h:outputLabel value="#{authorMessages.q_text}" />
   <br/></div>
   <f:verbatim><div class="tier2"></f:verbatim>
   <h:outputText value="#{authorMessages.defining_answers}" escape="false"/>
@@ -113,51 +113,62 @@
   <h:outputText value="#{authorMessages.fib_note_2}<br /><br />" escape="false"/>
   <h:outputText value="#{authorMessages.fib_note_3}<br /><br />" escape="false"/>
   <f:verbatim></div></f:verbatim>
-  
-   <h:panelGrid>
-   <samigo:wysiwyg
-     rows="140" value="#{itemauthor.currentItem.itemText}" hasToggle="yes" mode="author">
-    <f:validateLength maximum="60000"/>
-   </samigo:wysiwyg>
+
+  <div class="tier2">
+      <div class="longtext"><h:outputLabel value="#{authorMessages.new_markers_pair}" />
+          <h:inputText id="newmarkers" value="#{itemauthor.currentItem.markersPair}" required="false">
+              <f:validateLength maximum="2" minimum="2" />
+          </h:inputText>
+          <br/>  <h:message for="newmarkers" styleClass="validate"/>
+      </div>
+      <br/>
+  </div>
+
+  <h:panelGrid>
+      <samigo:wysiwyg
+          rows="140" value="#{itemauthor.currentItem.itemText}" hasToggle="yes" mode="author">
+         <f:validateLength maximum="60000"/>
+      </samigo:wysiwyg>
   </h:panelGrid>
- <br />
+  <br />
 
-<h:panelGrid columns="1" border="0">
-<h:panelGroup>
-<h:selectBooleanCheckbox value="#{itemauthor.currentItem.caseSensitiveForFib}">
-</h:selectBooleanCheckbox>
-<h:outputText value="#{authorMessages.case_sensitive}" escape="false"/>
-</h:panelGroup>
-<h:panelGroup>
-<h:outputText value="&nbsp;&nbsp;" escape="false"/>
-<h:outputText value="#{authorMessages.case_sensitive_note}" escape="false"/>
-</h:panelGroup>
-<h:panelGroup>
-<h:outputText value="&nbsp;&nbsp;" escape="false"/>
-<h:outputText value="#{authorMessages.case_sensitive_example}" escape="false"/>
-</h:panelGroup>
-</h:panelGrid>
-<br/>
+  <h:panelGrid columns="1" border="0">
+      <h:panelGroup>
+        <h:selectBooleanCheckbox value="#{itemauthor.currentItem.caseSensitiveForFib}">
+        </h:selectBooleanCheckbox>
+        <h:outputText value="#{authorMessages.case_sensitive}" escape="false"/>
+     </h:panelGroup>
+     <h:panelGroup>
+        <h:outputText value="&nbsp;&nbsp;" escape="false"/>
+        <h:outputText value="#{authorMessages.case_sensitive_note}" escape="false"/>
+     </h:panelGroup>
+     <h:panelGroup>
+        <h:outputText value="&nbsp;&nbsp;" escape="false"/>
+        <h:outputText value="#{authorMessages.case_sensitive_example}" escape="false"/>
+     </h:panelGroup>
+  </h:panelGrid>
+  <br/>
 
-<h:panelGrid columns="1">
-<h:panelGroup>
-<h:selectBooleanCheckbox value="#{itemauthor.currentItem.mutuallyExclusiveForFib}">
-</h:selectBooleanCheckbox>
-<h:outputText value="#{authorMessages.mutually_exclusive}" escape="false"/>
-</h:panelGroup>
-<h:panelGroup>
-<h:outputText value="&nbsp;&nbsp;" escape="false"/>
-<h:outputText value="#{authorMessages.mutually_exclusive_note}" escape="false"/>
-</h:panelGroup>
-<h:panelGroup>
-<h:outputText value="&nbsp;&nbsp;" escape="false"/>
-<h:outputText value="#{authorMessages.mutually_exclusive_example}" escape="false"/>
-</h:panelGroup>
-</h:panelGrid>
+
+  <h:panelGrid columns="1">
+     <h:panelGroup>
+       <h:selectBooleanCheckbox value="#{itemauthor.currentItem.mutuallyExclusiveForFib}">
+       </h:selectBooleanCheckbox>
+        <h:outputText value="#{authorMessages.mutually_exclusive}" escape="false"/>
+     </h:panelGroup>
+     <h:panelGroup>
+        <h:outputText value="&nbsp;&nbsp;" escape="false"/>
+        <h:outputText value="#{authorMessages.mutually_exclusive_note}" escape="false"/>
+     </h:panelGroup>
+     <h:panelGroup>
+        <h:outputText value="&nbsp;&nbsp;" escape="false"/>
+        <h:outputText value="#{authorMessages.mutually_exclusive_example}" escape="false"/>
+     </h:panelGroup>
+  </h:panelGrid>
 </div>
 
-  <!-- 2a ATTACHMENTS -->
-  <%@ include file="/jsf/author/item/attachment.jsp" %>
+<!-- 2a ATTACHMENTS -->
+<%@ include file="/jsf/author/item/attachment.jsp" %>
 
 <%-- 3 PART --%>
 <h:panelGrid columns="3" columnClasses="shorttext" rendered="#{itemauthor.target == 'assessment'  && !author.isEditPoolFlow}">

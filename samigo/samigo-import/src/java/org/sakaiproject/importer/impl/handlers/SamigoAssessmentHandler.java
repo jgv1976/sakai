@@ -229,6 +229,7 @@ public class SamigoAssessmentHandler implements HandlesImportable {
 						text.setText(questionTextString);
 						itemFacade.setTypeId(Long.valueOf(SamigoPoolHandler.FILL_BLANK));
 					} else if (importableQuestion.getQuestionType() == SamigoPoolHandler.FILL_BLANK) {
+						//If we are going to import questions with other markers than {} then we will need to modify this.
 						if (j.hasNext()) continue;
 						answer.setText(answerBuffer.toString());
 						Pattern pattern = Pattern.compile("_+|<<.*>>");

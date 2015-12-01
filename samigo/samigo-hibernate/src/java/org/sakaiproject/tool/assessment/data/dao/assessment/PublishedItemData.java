@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Category;
 import org.sakaiproject.tool.assessment.data.dao.grading.ItemGradingData;
@@ -515,8 +516,12 @@ public class PublishedItemData
        if (this.getTypeId().equals(TypeIfc.FILL_IN_BLANK))
        { //e.g. Roses are {}. Violets are {}. replace as
          // Roses are ____. Violets are ____.
-         text = text.replaceAll("\\{","__");
-         text = text.replaceAll("\\}","__");
+         String markers_pair= StringEscapeUtils.unescapeHtml(this.getItemMetaDataByLabel("MARKERS_PAIR"));
+         if ((StringUtils.isEmpty(markers_pair))||markers_pair.length()!=2){
+           markers_pair="{}";
+         }
+           text = text.replaceAll("\\"+markers_pair.charAt(0),"__");
+           text = text.replaceAll("\\"+markers_pair.charAt(1),"__");
       }
        if (this.getTypeId().equals(TypeIfc.FILL_IN_NUMERIC))
        { //e.g. Roses are {}. Violets are {}. replace as
