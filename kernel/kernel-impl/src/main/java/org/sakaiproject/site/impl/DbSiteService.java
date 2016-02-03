@@ -516,7 +516,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			// if we are joining, start our where with the join clauses
 			StringBuilder where = new StringBuilder();
-			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY))
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
 			{
 				// join on site id and also select the proper user
 				where.append(siteServiceSql.getSitesWhere1Sql());
@@ -576,6 +576,9 @@ public abstract class DbSiteService extends BaseSiteService
 
 			if (type == SelectionType.INACTIVE_ONLY) {
 				where.append(siteServiceSql.getUnpublishedSitesOnlySql());
+			}
+			if (type == SelectionType.ACTIVE) {
+				where.append(siteServiceSql.getPublishedSitesOnlySql());
 			}
 
 			// reject non-joinable sites
@@ -722,14 +725,14 @@ public abstract class DbSiteService extends BaseSiteService
 				}
 			}
 			if (criteria != null) fieldCount += 1;
-			if ((type == SelectionType.JOINABLE) || (type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY)) fieldCount++;
+			if ((type == SelectionType.JOINABLE) || (type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE)) fieldCount++;
 			if (propertyCriteria != null) fieldCount += (2 * propertyCriteria.size());
 			Object fields[] = null;
 			if (fieldCount > 0)
 			{
 				fields = new Object[fieldCount];
 				int pos = 0;
-				if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY))
+				if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
 				{
 					fields[pos++] = getCurrentUserIdIfNull(userId);
 				}
@@ -807,7 +810,7 @@ public abstract class DbSiteService extends BaseSiteService
 		{
 			// do we need a join?
 			String join = null;
-			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY))
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
 			{
 				// join with the SITE_USER table
 				join = siteServiceSql.getSitesJoin1Sql();
@@ -988,6 +991,85 @@ public abstract class DbSiteService extends BaseSiteService
 			List<String> siteIds = (List<String>) sqlService().dbRead(sql, values, siteIdReader);
 			return siteIds;
 		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public List<String> getSiteIdsNotFilteredByUser(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page)
+		{
+			String join=getSitesJoin( type, sort );
+
+			//Remove the join with the users table if it has been added and set to null if there is not other joined tables.
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
+			{
+				join=join.replace(siteServiceSql.getSitesJoin1Sql(),"");
+				if (join.trim().length()<1){
+					join=null;
+				}
+			}
+
+			String order = getSitesOrder( sort );
+
+			Object[] values = getSitesFields( type, ofType, criteria, propertyCriteria);
+
+			//Remove from the Object array the userID value if it has been added and resize the array
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
+			{
+
+				String userId= getCurrentUserIdIfNull(null);
+				boolean found=false;
+				int j=0;
+				for (int i=0; i<values.length ;i++)
+				{
+					if (!(values[i].toString().equals(userId))){
+						values[j]=values[i];
+						j++;
+					}else{  //We only remove it the first time it appears in the values array
+						if (!found){
+							found=true;
+						}else{
+							values[j]=values[i];
+							j++;
+						}
+					}
+
+				}
+				if (found) {
+					//if we have found the userId then we need to resize the Array...
+					// as it is not a Arraylist or any other, we need to do it in a "classic way"
+					Object[] values2 = new Object[values.length - 1];
+					System.arraycopy(values, 0, values2, 0, values.length - 1);
+					values = values2;
+				}
+			}
+			String where = getSitesWhere(type, ofType, criteria, propertyCriteria, sort);
+			//Remove the UserID part in the where but leave the rest of the where.
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
+			{
+				where=where.replace(siteServiceSql.getSitesWhere1Sql(),"");
+			}
+
+			String sql;
+			if (page != null)
+			{
+				int first = page.getFirst();
+				int last = page.getLast();
+				sql = getResourceSql(fieldList(m_siteIdFieldArray, null), where, order, values, first, last, join);
+				values = getPagedParameters(values, first, last);
+			}
+			else
+			{
+				sql = getResourceSql(fieldList(m_siteIdFieldArray, null), where, order, values, join);
+			}
+			M_log.debug("SQL is:" + sql);
+
+			@SuppressWarnings("unchecked")
+			List<String> siteIds = (List<String>) sqlService().dbRead(sql, values, siteIdReader);
+
+			return siteIds;
+		}
+
+
 
 		/**
 		 * {@inheritDoc}
@@ -1184,7 +1266,7 @@ public abstract class DbSiteService extends BaseSiteService
 		{
 			// if we are joining, start our where with the join clauses
 			StringBuilder where = new StringBuilder();
-			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY))
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
 			{
 				// join on site id and also select the proper user
 				where.append(siteServiceSql.getSitesWhere1Sql());
@@ -1246,6 +1328,9 @@ public abstract class DbSiteService extends BaseSiteService
             if (type == SelectionType.INACTIVE_ONLY) {
                 where.append(siteServiceSql.getUnpublishedSitesOnlySql());
             }
+			if (type == SelectionType.ACTIVE) {
+				where.append(siteServiceSql.getPublishedSitesOnlySql());
+			}
 
 			// reject non-joinable sites
 			if (type == SelectionType.JOINABLE) where.append(siteServiceSql.getSitesWhere7Sql());
@@ -1265,7 +1350,7 @@ public abstract class DbSiteService extends BaseSiteService
 
 			// do we need a join?
 			String join = null;
-			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY))
+			if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
 			{
 				// join with the SITE_USER table
 				join = siteServiceSql.getSitesJoin1Sql();
@@ -1303,14 +1388,14 @@ public abstract class DbSiteService extends BaseSiteService
 				}
 			}
 			if (criteria != null) fieldCount += 1;
-			if ((type == SelectionType.JOINABLE) || (type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY)) fieldCount++;
+			if ((type == SelectionType.JOINABLE) || (type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE)) fieldCount++;
 			if (propertyCriteria != null) fieldCount += (2 * propertyCriteria.size());
 			Object fields[] = null;
 			if (fieldCount > 0)
 			{
 				fields = new Object[fieldCount];
 				int pos = 0;
-				if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY))
+				if ((type == SelectionType.ACCESS) || (type == SelectionType.UPDATE) || (type == SelectionType.MEMBER) || (type == SelectionType.DELETED) || (type == SelectionType.PUBVIEW) || (type == SelectionType.INACTIVE_ONLY) || (type == SelectionType.ACTIVE))
 				{
 					fields[pos++] = sessionManager().getCurrentSessionUserId();
 				}

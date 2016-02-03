@@ -172,7 +172,7 @@ public class CourseSiteRemovalServiceImpl extends HibernateDaoSupport implements
                // get a list of all published course sites in ascending creation date order which are associated with the specified academic session
                Hashtable<String, String> propertyCriteria = new Hashtable<String, String>();
                propertyCriteria.put("term_eid", academicSession.getEid());
-                List<String> sites = (List<String>)siteService.getSiteIds(SelectionType.PUBVIEW, "course", null, propertyCriteria, SortType.CREATED_ON_ASC, null);
+                List<String> sites = (List<String>)siteService.getSiteIdsNotFilteredByUser(SelectionType.ACTIVE, "course", null, propertyCriteria, SortType.CREATED_ON_ASC, null);
 
                 for(String siteId : sites) {
                      // see if this service has already removed/unpublished this course site once before.

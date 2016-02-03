@@ -195,7 +195,7 @@ public class CourseSitePublishServiceImpl extends HibernateDaoSupport implements
                // get a list of all published and unpublished course sites in ascending creation date order which are associated with the specified academic session
                Hashtable<String, String> propertyCriteria = new Hashtable<String, String>();
                propertyCriteria.put("term_eid", academicSession.getEid());
-               List<String> sites = (List<String>)siteService.getSiteIds(SelectionType.INACTIVE_ONLY, "course", null, propertyCriteria, SortType.CREATED_ON_ASC, null);
+               List<String> sites = (List<String>)siteService.getSiteIdsNotFilteredByUser(SelectionType.INACTIVE_ONLY, "course", null, propertyCriteria, SortType.CREATED_ON_ASC, null);
 
                for(String siteId : sites) {
                   //site.loadAll();

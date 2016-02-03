@@ -2153,6 +2153,13 @@ public abstract class BaseSiteService implements SiteService, Observer
 	    return storage().getSiteIds(type, ofType, criteria, propertyCriteria, sort, page);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.sakaiproject.site.api.SiteService#getSiteIdsNotFilteredByUser(org.sakaiproject.site.api.SiteService.SelectionType, java.lang.Object, java.lang.String, java.util.Map, org.sakaiproject.site.api.SiteService.SortType, org.sakaiproject.javax.PagingPosition)
+	 */
+	public List<String> getSiteIdsNotFilteredByUser(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page) {
+		return storage().getSiteIdsNotFilteredByUser(type, ofType, criteria, propertyCriteria, sort, page);
+	}
+
 	/**
 	 * @inheritDoc
 	 */
@@ -3000,6 +3007,29 @@ public abstract class BaseSiteService implements SiteService, Observer
 		 * @return a List of the Site IDs for the sites matching the criteria.
 		 */
 		List<String> getSiteIds(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page);
+
+		/**
+		 * Get the Site IDs for all sites matching criteria without filtering by userId
+		 * This is useful when you only need the listing of site ids (for other operations) and do not need the actual Site objects.
+		 *
+		 *
+		 * @param type
+		 *        The SelectionType specifying what sort of selection is intended.
+		 * @param ofType
+		 *        Site type criteria: null for any type; a String to match a single type; A String[], List or Set to match any type in the collection.
+		 * @param criteria
+		 *        Additional selection criteria: sites returned will match this string somewhere in their id, title, description, or skin.
+		 * @param propertyCriteria
+		 *        Additional selection criteria: sites returned will have a property named to match each key in the map, whose values match (somewhere in their value) the value in the map (may be null or empty).
+		 * @param sort
+		 *        A SortType indicating the desired sort. For no sort, set to SortType.NONE.
+		 * @param page
+		 *        The PagePosition subset of items to return.
+		 * @return a List of the Site IDs for the sites matching the criteria.
+		 */
+		List<String> getSiteIdsNotFilteredByUser(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page);
+
+
 
 		/**
 		 * Count the Site objets that meet specified criteria.

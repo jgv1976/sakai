@@ -367,4 +367,9 @@ public interface SiteServiceSql
 	 * returns part of the where clause to retrieve sites that are unpublished
 	 */
 	String getUnpublishedSitesOnlySql();
+
+	/**
+	 * returns part of the where clause to retrieve sites that are unpublished
+	 */
+	String getPublishedSitesOnlySql();
 }

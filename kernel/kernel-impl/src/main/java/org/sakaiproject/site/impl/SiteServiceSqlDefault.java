@@ -578,4 +578,8 @@ public class SiteServiceSqlDefault implements SiteServiceSql
 	public String getUnpublishedSitesOnlySql() {
 		return "SAKAI_SITE.PUBLISHED = '0' and ";
 	}
+
+	public String getPublishedSitesOnlySql() {
+		return "SAKAI_SITE.PUBLISHED = '1' and ";
+	}
 }

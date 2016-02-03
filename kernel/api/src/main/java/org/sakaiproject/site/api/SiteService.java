@@ -298,6 +298,9 @@ public interface SiteService extends EntityProducer
 		/** Get any deleted sites, normally used by admin or purge job. */
 		public static final SelectionType ANY_DELETED = new SelectionType("anyDeleted", false, false, false, false);
 
+		/** Get published sites the current user has access to */
+		public static final SelectionType ACTIVE = new SelectionType("active", true, true, true, true);
+
 		/** Get unpublished sites the current user has access to */
 		public static final SelectionType INACTIVE_ONLY = new SelectionType("inactive", true, true, false, true);
 	}
@@ -1052,6 +1055,29 @@ public interface SiteService extends EntityProducer
 	 * @return The List of Site objects that meet specified criteria, with potentially empty descriptions based on requireDescription and caching.
 	 */
 	List<Site> getSites(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page, boolean requireDescription);
+
+	/**
+	 * Get the Site IDs for all sites matching criteria without filtering by userId
+	 * This is useful when you only need the listing of site ids (for other operations) and do not need the actual Site objects.
+	 *
+	 *
+	 * @param type
+	 *        The SelectionType specifying what sort of selection is intended.
+	 * @param ofType
+	 *        Site type criteria: null for any type; a String to match a single type; A String[], List or Set to match any type in the collection.
+	 * @param criteria
+	 *        Additional selection criteria: sites returned will match this string somewhere in their id, title, description, or skin.
+	 * @param propertyCriteria
+	 *        Additional selection criteria: sites returned will have a property named to match each key in the map, whose values match (somewhere in their value) the value in the map (may be null or empty).
+	 * @param sort
+	 *        A SortType indicating the desired sort. For no sort, set to SortType.NONE.
+	 * @param page
+	 *        The PagePosition subset of items to return.
+	 * @return a List of the Site IDs for the sites matching the criteria.
+	 */
+	List<String> getSiteIdsNotFilteredByUser(SelectionType type, Object ofType, String criteria, Map<String, String> propertyCriteria, SortType sort, PagingPosition page);
+
+
 
 	/**
 	 * Get the Site IDs for all sites matching criteria.
