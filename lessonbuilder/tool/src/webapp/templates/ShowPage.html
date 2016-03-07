@@ -300,6 +300,10 @@
                       <a href="#" role="menuitem" rsf:id="export-cc" id="export-cc"><span rsf:id="msg=simplepage.export_cc"></span></a>
                       <!-- just a message, so will display when it should not-->
                     </li>
+                    <li>
+                      <a href="#" role="menuitem" rsf:id="import-cp" id="import-cp"><span rsf:id="msg=simplepage.import_cp_button"></span></a>
+                      <!-- just a message, so will display when it should not-->
+                    </li>
                     <li rsf:id="show-lti-import">
                       <form action="#" rsf:id="lti-import-form" method="post" enctype="multipart/form-data">
 			<input type="hidden" rsf:id="csrf1" />
@@ -1240,9 +1244,32 @@
 					    <input type="submit" rsf:id="export-cc-cancel" onclick="closeExportCcDialog(); return false" />
 					  </p>
 
-					</div>
-				</form>
-			</div>
+            		</div>
+                </form>
+            </div>
+
+            <div id="import-cp-dialog" rsf:id="import-cp-dialog" class="lessonsDialog">
+                <form action="#" rsf:id="import-cp-form" method="post" enctype="multipart/form-data" class="controlsPanel">
+                  <input type="hidden" rsf:id="csrf23" />
+                     <div class="">
+                         <p class="required shorttext">
+                             <label rsf:id="msg=simplepage.import_cp_file" for="cp_file" id="cp-dialog-label">File</label> <br />
+                             <input type="file" name="mm-file" id="cp-file" style="width:95%" class="edit-multimedia-input" /><br />
+                         </p>
+                         <p class="checkbox">
+                             <input type="checkbox" name="cpOnePage" id="cpOnePage" rsf:id="cpOnePage"/>
+                             <label for="cpOnePage"><span rsf:id="msg=simplepage.cpOnePage-label" for="cpOnePage" id="cpOnePage-label"></span></label> <br />
+                         </p>
+
+                         <p>
+                              <input class="bold" type="submit" id="import-cp-submit" rsf:id="import-cp-submit" />
+                              <input type="submit" rsf:id="mm-cancel" onclick="closeImportMeleteCPDialog(); return false" />
+                         </p>
+                         <p id="import-cp-loading" rsf:id="msg=simplepage.loading">
+                         </p>
+                     </div>
+                </form>
+            </div>
 
 			<div id="edit-title-dialog" rsf:id="edit-title-dialog" class="lessonsDialog">
 				<div class="ui-widget" id="edit-title-error-container">

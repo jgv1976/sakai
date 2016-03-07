@@ -739,6 +739,11 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				UIOutput.make(tofill, "import-cc").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.import_cc.tooltip")));
 				UIOutput.make(tofill, "export-cc").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.export_cc.tooltip")));
 
+				boolean showMeleteImport = ServerConfigurationService.getBoolean("lessonbuilder.allow-MeleteImport", false);
+
+				if (showMeleteImport) {
+					UIOutput.make(tofill, "import-cp").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.import_cp.tooltip")));
+				}
 				// Check to see if we have tools registered for external import
 				List<Map<String, Object>> toolsFileItem = simplePageBean.getToolsFileItem();
 				if ( toolsFileItem.size() > 0 ) {
@@ -2981,6 +2986,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		createNewPageDialog(tofill, currentPage, pageItem);
 		createRemovePageDialog(tofill, currentPage, pageItem);
 		createImportCcDialog(tofill);
+		createImportMeleteCPDialog(tofill);
 		createExportCcDialog(tofill);
 		createYoutubeDialog(tofill, currentPage);
 		createMovieDialog(tofill, currentPage);
@@ -3753,6 +3759,19 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		UIInput.make(form, "mm-is-caption", "#{simplePageBean.isCaption}");
 		UICommand.make(form, "mm-cancel", messageLocator.getMessage("simplepage.cancel"), null);
 	}
+
+	private void createImportMeleteCPDialog(UIContainer tofill) {
+		UIOutput.make(tofill, "import-cp-dialog").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.import_cp")));
+
+		UIForm form = UIForm.make(tofill, "import-cp-form");
+		makeCsrf(form, "csrf23");
+
+		UICommand.make(form, "import-cp-submit", messageLocator.getMessage("simplepage.save_message"), "#{simplePageBean.importCp}");
+		UICommand.make(form, "mm-cancel", messageLocator.getMessage("simplepage.cancel"), null);
+		UIBoundBoolean.make(form, "import-toplevel", "#{simplePageBean.importtop}");
+		UIBoundBoolean.make(form, "cpOnePage", "#{simplePageBean.cpOnePage}");
+	}
+
 
 	private void createImportCcDialog(UIContainer tofill) {
 		UIOutput.make(tofill, "import-cc-dialog").decorate(new UIFreeAttributeDecorator("title", messageLocator.getMessage("simplepage.import_cc")));

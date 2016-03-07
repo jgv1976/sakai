@@ -49,6 +49,7 @@ import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.id.cover.IdManager;
 import org.sakaiproject.lessonbuildertool.*;
 import org.sakaiproject.lessonbuildertool.cc.CartridgeLoader;
+import org.sakaiproject.lessonbuildertool.cc.MeleteToLessonsZipConverter;
 import org.sakaiproject.lessonbuildertool.cc.Parser;
 import org.sakaiproject.lessonbuildertool.cc.PrintHandler;
 import org.sakaiproject.lessonbuildertool.cc.ZipLoader;
@@ -261,7 +262,9 @@ public class SimplePageBean {
 	private String quiztool = null;
 	private String topictool = null;
 	private String assigntool = null;
-        private boolean importtop = false;
+    private boolean importtop = false;
+
+	private boolean cpOnePage=false;
 	
 	private Integer editPrivs = null;
 	private String currentSiteId = null;
@@ -753,9 +756,12 @@ public class SimplePageBean {
 		this.addBefore = n;
 	}
 
-        public void setImporttop(boolean i) {
+	public void setImporttop(boolean i) {
 	    this.importtop = i;
 	}
+
+	//Import from Melete CP everything in only one page with a subpage per module, or each module in a different page.
+	public void setCpOnePage(boolean cpOnePage) { this.cpOnePage = cpOnePage; }
 
     // gets called for non-checked boxes also, but q will be null
 	public void setQuiztool(String q) {
@@ -6114,6 +6120,101 @@ public class SimplePageBean {
 		}
 		return length;
 	}
+
+
+
+
+	public void importCp() {
+		if (!canEditPage())
+			return;
+		if (!checkCsrf())
+			return;
+
+		MultipartFile file = null;
+
+		if (multipartMap.size() > 0) {
+			// user specified a file, create it
+			file = multipartMap.values().iterator().next();
+		}
+
+		if (file != null) {
+			if (!uploadSizeOk(file))
+				return;
+
+			//DIEGO NOTES Convert file in the right file with the MeleteToLessonsZipConverter...
+			MeleteToLessonsZipConverter meleteToLessonsZipConverter = new MeleteToLessonsZipConverter(file,this.getCurrentSiteId(),cpOnePage);
+			file=meleteToLessonsZipConverter.convert();
+
+			File cc = null;
+			File root = null;
+			try {
+				cc = File.createTempFile("ccloader", "file");
+				root = File.createTempFile("ccloader", "root");
+				if (root.exists()) {
+					if (!root.delete()) {
+						setErrMessage("unable to delete temp file for load");
+						return;
+					}
+				}
+				if (!root.mkdir()) {
+					setErrMessage("unable to create temp directory for load");
+					return;
+				}
+				BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
+				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(cc));
+				byte[] buffer = new byte[8096];
+				int n = 0;
+				while ((n = bis.read(buffer, 0, 8096)) >= 0) {
+					if (n > 0)
+						bos.write(buffer, 0, n);
+				}
+				bis.close();
+				bos.close();
+
+				CartridgeLoader cartridgeLoader = ZipLoader.getUtilities(cc, root.getCanonicalPath());
+				Parser parser = Parser.createCartridgeParser(cartridgeLoader);
+
+				LessonEntity quizobject = null;
+				for (LessonEntity q = quizEntity; q != null; q = q.getNextEntity()) {
+					if (q.getToolId().equals(quiztool))
+							quizobject = q;
+				}
+
+				LessonEntity assignobject = null;
+				for (LessonEntity q = assignmentEntity; q != null; q = q.getNextEntity()) {
+					if (q.getToolId().equals(assigntool))
+								assignobject = q;
+				}
+
+				LessonEntity topicobject = null;
+				for (LessonEntity q = forumEntity; q != null; q = q.getNextEntity()) {
+					if (q.getToolId().equals(topictool))
+						topicobject = q;
+				}
+
+				parser.parse(new PrintHandler(this, cartridgeLoader, simplePageToolDao, quizobject, topicobject, bltiEntity, assignobject, importtop));
+				setTopRefresh();
+
+			} catch (Exception e) {
+				setErrKey("simplepage.cp-error", "");
+				e.printStackTrace();
+			} finally {
+			    if (cc != null)
+					try {
+					    deleteRecursive(cc);
+					} catch (Exception e){
+
+					}
+					try {
+					    deleteRecursive(root);
+					} catch (Exception e){
+
+					}
+			}
+		}
+
+	}
+
 
 	// called by edit dialog to update parameters of a Youtube item
 	public void updateYoutube() {

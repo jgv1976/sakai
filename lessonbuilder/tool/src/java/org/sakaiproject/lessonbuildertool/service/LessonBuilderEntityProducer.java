@@ -1956,6 +1956,8 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
 	return loadCartridge(cartridge.getStoreLocation(), null, siteId);
     }
 
+	//DIEGO NOTES: This if we want to allow Melete CP files to be loaded in a REST service...
+
     public String loadCartridge(File cartFile, String unzippedDir, String siteId) {
 	if ((cartFile == null && unzippedDir == null) || siteId == null)
 	    return "missing arguments " + cartFile + " " + siteId;
