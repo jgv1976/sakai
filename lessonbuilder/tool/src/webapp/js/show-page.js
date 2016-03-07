@@ -2,6 +2,7 @@ var dropdownViaClick = false;
 var oldloc;
 var requirementType = 0;
 var importccactive = false;
+var importcpactive = false;
 var mmactive = false;
 var insist = false;
 var delbutton;
@@ -167,6 +168,14 @@ $(document).ready(function() {
 		});
 	
 		$('#export-cc-dialog').dialog({
+			autoOpen: false,
+			width: modalDialogWidth(),
+			modal: true,
+			resizable: false,
+			draggable: false
+		});
+
+		$('#import-cp-dialog').dialog({
 			autoOpen: false,
 			width: modalDialogWidth(),
 			modal: true,
@@ -373,6 +382,35 @@ $(document).ready(function() {
 			$("#import-cc-loading").show();
 			return true;
 	    	});
+
+		$('#import-cp').click(function(){
+
+			oldloc = $(".dropdown a");
+			closeDropdowns();
+			$("#import-cp-loading").hide();
+			$("#importtop").prop("checked", false);
+			importcpactive = true;
+			$('#import-cp-dialog').dialog('open');
+			setupdialog($('#import-cp-dialog'));
+			return false;
+		});
+
+		$('#import-cp-submit').click(function() {
+			// prevent double clicks
+			if (!importcpactive)
+				return false;
+			importcpactive = false;
+			var cpOnePage = row.find(".cpOnePage").text();
+			if(cpOnePage === "true") {
+				$("#cpOnePage").prop("checked", true);
+			}else {
+				$("#cpOnePage").prop("checked", false);
+			}
+			$("#import-cp-loading").show();
+			return true;
+		});
+
+
 
 	    // This code must be read together with the SimplePageItem.MULTIMEDIA
 	    // display code in ShowPageProducer.java (To find it search for
@@ -1891,6 +1929,7 @@ $(document).ready(function() {
 				$('#movie-dialog').dialog('isOpen') ||
 				$('#import-cc-dialog').dialog('isOpen') ||
 				$('#export-cc-dialog').dialog('isOpen') ||
+				$('#import-cp-dialog').dialog('isOpen') ||
 				$('#comments-dialog').dialog('isOpen') ||
 				$('#column-dialog').dialog('isOpen') ||
 			        $('#student-dialog').dialog('isOpen') ||
@@ -2294,6 +2333,11 @@ function closeNewPageDialog() {
 
 function closeImportCcDialog() {
 	$('#import-cc-dialog').dialog('close');
+	oldloc.focus();
+}
+
+function closeImportMeleteCPDialog() {
+	$('#import-cp-dialog').dialog('close');
 	oldloc.focus();
 }
 
